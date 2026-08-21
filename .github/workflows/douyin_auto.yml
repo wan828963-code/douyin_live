@@ -1,0 +1,43 @@
+name: 抖音自动更新
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: 运行脚本
+        run: python3 update_m3u.py
+
+      - name: 提交推送
+        run: |
+          git config --local user.name "bot"
+          git config --local user.email "bot@localhost"
+          git add kuaishou_live.m3u
+          if git diff --staged --quiet; then
+            echo "无变化，跳过提交"
+          else
+            git commit -m "抖音直播源更新 $(date '+%Y-%m-%d %H:%M')"
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          fi
