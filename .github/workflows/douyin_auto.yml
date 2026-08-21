@@ -5,18 +5,21 @@ on:
     - cron: '0 */2 * * *'
   workflow_dispatch:
 
+# 关键：授予最大的写权限
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 拉取代码
+      - name: 拉取代码 (带 Token)
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # 拉取全部历史，避免冲突
 
       - name: 设置 Python
         uses: actions/setup-python@v5
@@ -30,14 +33,26 @@ jobs:
       - name: 运行脚本
         run: python3 update_m3u.py
 
-      - name: 提交推送
+      - name: 强制提交推送
         run: |
-          git config --local user.name "bot"
-          git config --local user.email "bot@localhost"
-          git add kuaishou_live.m3u
+          # 配置用户信息
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 添加文件
+          git add douyin_live.m3u
+          
+          # 检查是否有变动
           if git diff --staged --quiet; then
-            echo "无变化，跳过提交"
-          else
-            git commit -m "抖音直播源更新 $(date '+%Y-%m-%d %H:%M')"
-            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+            echo "没有文件变动，跳过提交"
+            exit 0
           fi
+          
+          # 拉取最新远程代码并变基，避免冲突
+          git pull origin main --rebase || true
+          
+          # 提交
+          git commit -m "自动更新抖音源 $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')"
+          
+          # 强制推送（解决权限和冲突问题）
+          git push origin HEAD:main --force
