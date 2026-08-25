@@ -41,8 +41,7 @@ BROWSER_SCRIPT = os.path.join(BASE_DIR, 'browser_fetch.mjs')
 UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
       '(KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36')
 
-# ========== 🔥 关键修改：每分类只抓 3 页（约 45 个房间），文件控制在 2-3 MB ==========
-MAX_PAGES = 3            # 每个分类最多拉 3 页(15/页 ≈ 45 房间)
+MAX_PAGES = 14           # 每个分类最多拉 14 页(15/页 ≈ 210 房间)
 PAGE_SLEEP = 1.2         # 页面请求间隔，避免触发风控
 SOURCE_SLEEP = 1.0       # 来源之间的间隔
 BROWSER_TIMEOUT = 300    # 单个来源浏览器兜底超时(秒)
