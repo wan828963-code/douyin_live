@@ -32,7 +32,7 @@ const UA =
   '(KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36';
 
 const CATEGORY_API = 'webcast/web/partition/detail/room/v2';
-const MAX_SCROLLS = 20;      // 最多滚动次数
+const MAX_SCROLLS = 5;      // 最多滚动次数
 const SCROLL_DELAY = 1200;   // 每次滚动间隔(ms)
 const IDLE_STOP = 4;         // 连续几次数量不增长就停止
 
