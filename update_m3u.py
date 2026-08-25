@@ -183,6 +183,11 @@ def extract_cdn_url(room):
 def parse_category_item(it):
     """从分类接口单条记录取出 (rid, title, avatar, nickname)"""
     room = it.get('room') or {}
+    
+    # 🔥 只保留正在直播的房间（有 stream_url 才是在线）
+    if not room.get('stream_url'):
+        return None
+    
     owner = room.get('owner') or it.get('owner') or {}
     rid = str(it.get('web_rid') or room.get('web_rid') or room.get('webRid') or '').strip()
     if not (rid.isdigit() and 6 <= len(rid) <= 15):
