@@ -41,7 +41,7 @@ BROWSER_SCRIPT = os.path.join(BASE_DIR, 'browser_fetch.mjs')
 UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
       '(KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36')
 
-MAX_PAGES = 14           # 每个分类最多拉 14 页(15/页 ≈ 210 房间)
+MAX_PAGES = 3            # 每个分类最多拉 3 页(15/页 ≈ 45 房间)
 PAGE_SLEEP = 1.2         # 页面请求间隔，避免触发风控
 SOURCE_SLEEP = 1.0       # 来源之间的间隔
 BROWSER_TIMEOUT = 300    # 单个来源浏览器兜底超时(秒)
@@ -610,6 +610,18 @@ def main():
                 seen_new.add(r['rid'])
                 new_rooms.append(r)
                 group_of[r['rid']] = group
+
+    # 🔥 每天凌晨 0 点清空一次，其他时间增量更新
+    import datetime
+    today = datetime.datetime.now().strftime('%Y-%m-%d')
+    if not hasattr(main, '_last_date') or main._last_date != today:
+        main._last_date = today
+        if os.path.exists(M3U_PATH):
+            with open(M3U_PATH, 'w', encoding='utf-8') as f:
+                f.write('#EXTM3U\n')
+            print('📅 新的一天，已清空旧文件，重新生成')
+        else:
+            print('📅 新的一天，文件不存在，直接生成')
 
     header, old_entries, old_seen = read_existing_m3u()
     top_rids = {r['rid'] for r in new_rooms}
